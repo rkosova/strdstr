@@ -8,68 +8,45 @@
  **/
 
 
-int count_delim(char *in, char delimiter); 													       // count number of delimiters in data
-void get_delim_pos(char *in, int *out, char delimiter); 									       // poistions of delimiters
-int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, char delimiter);    // biggest distance between delimiters
-void remove_newline(char *in);																       // remove trailing '\n'
+int count_delim(char *in, char delimiter); 													   		// count number of delimiters in data
+void get_delim_pos(char *in, int *out, char delimiter); 									        // poistions of delimiters
+int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, char delimiter);     // biggest distance between delimiters
+void remove_newline(char *in);																        // remove trailing '\n'
 
 char** strdstr(char *in, char delimiter, unsigned char mode)
 {
 
-	if(mode) {																				       // memory mode
+	if(mode) {																				        // memory mode
 		remove_newline(in); 
 		int delimiter_count = count_delim(in, delimiter);
 		int delimiter_position[delimiter_count];
 		get_delim_pos(in, delimiter_position, delimiter);
 		int *word_sizes = count_gr_distance(in, delimiter_position, delimiter_count, ',');
 
-		int prev_delimiter_position = 0;
-		char **words = malloc(sizeof(char*)*(delimiter_count+1));
+
+		int prev_word_end = 0, _c=0;
+		char **words = malloc(sizeof(char*) * (delimiter_count+1));
+
 
 		for(int w=0; w<delimiter_count+1; w++) {
-			char *temp = malloc((word_sizes[w]+1) * sizeof(char));
-
-			if (w==0) {
-				for(int c=0; c<delimiter_position[w]+1; c++) {
-					if (c<delimiter_position[w]) {
-						*(temp+c) = *(in+c); 
-					} else {
-						*(temp+c) = '\0';   
-					}
+			char *temp = malloc(sizeof(char) * (word_sizes[w]+1));
+			_c = 0;
+			for(int c=prev_word_end; c<=(prev_word_end+word_sizes[w]); c++) {
+				if (c<(prev_word_end+word_sizes[w])) {
+					*(temp + (c-prev_word_end)) = *(in+c);
+					_c = c-prev_word_end;
+				} else if (c==(prev_word_end+word_sizes[w])) {
+					*(temp + (c-prev_word_end)) = '\0';
+					_c = c-prev_word_end;
 				}
-				prev_delimiter_position = delimiter_position[w];	
-
-			} else if (w>0 && w<delimiter_count) {
-				int count=0;
-				for(int c=prev_delimiter_position+1; c<delimiter_position[w]+1; c++) {
-					if (c<delimiter_position[w]) {
-						*(temp+count) = *(in+c);
-						count++; 
-					} else {
-						*(temp+count) = '\0';
-						count++;
-					}
-				}
-				prev_delimiter_position = delimiter_position[w];	
-
-			} else if (w==delimiter_count) {  	// since w starts at 0 delimiter count doesn't have to be added 1
-				int countw = 0;
-				for(int c=prev_delimiter_position+1; c<(prev_delimiter_position+word_sizes[w]+2); c++) {
-					if (c<prev_delimiter_position+word_sizes[w]+1) {
-						*(temp+countw) = *(in+c); 
-						countw++;
-					} else {
-						*(temp+countw) = '\0';
-						countw++;
-					}
-				} // issue in this siection; repeats too many times. can lead to segfault
 			}
 
-			*(words+w)  = temp;						
-		}			// restructure																			   
+			prev_word_end = prev_word_end + _c + 1; 												// +1 to account for ','
+			*(words+w) = temp;
+		}															   
 
 		free(word_sizes);
-		return words;	
+		return words;				
 	}
 
 	return NULL;
@@ -106,29 +83,43 @@ int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, c
 {
 
 	int *word_sizes = malloc(sizeof(int*) * (delimiter_count+1));
+	int offset = 0;
+	int word_offset = 0;
+	int char_count = 0;
 
-	int word_count=0, previous_count=0, count=0, terminator_counter=0;
-
-	while(terminator_counter<2) {
-		// RESTRUCTURE THIS // 
-		if(*(in+count) == '\0') {
-				terminator_counter++;
+	do {
+		if(*(in+offset) != delimiter && *(in+offset) != '\0') {
+			char_count++;
+		}else{
+			*(word_sizes+word_offset) = char_count;
+			char_count = 0;
+			word_offset++;
 		}
+		offset++;
+	} while(*(in+(offset-1)));
+
+	// int word_count=0, previous_count=0, count=0, terminator_counter=0;
+
+	// while(terminator_counter<2) {
+	// 	// RESTRUCTURE THIS // 
+	// 	if(*(in+count) == '\0') {
+	// 			terminator_counter++;
+	// 	}
 		
-		if(*(in+count) == ',' || (*(in+count) == '\0' && terminator_counter<2)) {
-			if(word_count == 0) {
-				previous_count = count - previous_count;
-				*(word_sizes+word_count) = previous_count;
-				word_count++;
-			} else {
-				previous_count = count - previous_count - 1;									   // accounting for delimiter 
-				*(word_sizes+word_count) = previous_count;
-				word_count++;
-			}
-		}
-		count++;
-		//////////////////////
-	}
+	// 	if(*(in+count) == ',' || (*(in+count) == '\0' && terminator_counter<2)) {
+	// 		if(word_count == 0) {
+	// 			previous_count = count - previous_count;
+	// 			*(word_sizes+word_count) = previous_count;
+	// 			word_count++;
+	// 		} else {
+	// 			previous_count = count - previous_count - 1;									   // accounting for delimiter 
+	// 			*(word_sizes+word_count) = previous_count;
+	// 			word_count++;
+	// 		}
+	// 	}
+	// 	count++;
+	// 	//////////////////////
+	// }
 
 	return word_sizes;
 }
