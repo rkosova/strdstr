@@ -9,8 +9,7 @@
 
 
 int count_delim(char *in, char delimiter); 													   		// count number of delimiters in data
-void get_delim_pos(char *in, int *out, char delimiter); 									        // poistions of delimiters
-int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, char delimiter);     // biggest distance between delimiters
+int* get_word_size(char *in, int delimiter_count, char delimiter);     								// biggest distance between delimiters
 void remove_newline(char *in);																        // remove trailing '\n'
 
 char** strdstr(char *in, char delimiter, unsigned char mode)
@@ -19,10 +18,7 @@ char** strdstr(char *in, char delimiter, unsigned char mode)
 	if(mode) {																				        // memory mode
 		remove_newline(in); 
 		int delimiter_count = count_delim(in, delimiter);
-		int delimiter_position[delimiter_count];
-		get_delim_pos(in, delimiter_position, delimiter);
-		int *word_sizes = count_gr_distance(in, delimiter_position, delimiter_count, ',');
-
+		int *word_sizes = get_word_size(in, delimiter_count, ',');
 
 		int prev_word_end = 0, _c=0;
 		char **words = malloc(sizeof(char*) * (delimiter_count+1));
@@ -66,20 +62,7 @@ int count_delim(char *in, char delimiter)
 	return count;
 }
 
-void get_delim_pos(char *in, int *out, char delimiter) 
-{
-	int offset = 0, delims = 0;
-
-	while(*(in+offset)) {
-		if(*(in+offset)==delimiter) {
-			*(out+delims) = offset;
-			delims++;
-		}
-		offset++;
-	}
-}
-
-int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, char delimiter)
+int* get_word_size(char *in, int delimiter_count, char delimiter)
 {
 
 	int *word_sizes = malloc(sizeof(int*) * (delimiter_count+1));
@@ -96,30 +79,7 @@ int* count_gr_distance(char *in, int *delimiter_position, int delimiter_count, c
 			word_offset++;
 		}
 		offset++;
-	} while(*(in+(offset-1)));
-
-	// int word_count=0, previous_count=0, count=0, terminator_counter=0;
-
-	// while(terminator_counter<2) {
-	// 	// RESTRUCTURE THIS // 
-	// 	if(*(in+count) == '\0') {
-	// 			terminator_counter++;
-	// 	}
-		
-	// 	if(*(in+count) == ',' || (*(in+count) == '\0' && terminator_counter<2)) {
-	// 		if(word_count == 0) {
-	// 			previous_count = count - previous_count;
-	// 			*(word_sizes+word_count) = previous_count;
-	// 			word_count++;
-	// 		} else {
-	// 			previous_count = count - previous_count - 1;									   // accounting for delimiter 
-	// 			*(word_sizes+word_count) = previous_count;
-	// 			word_count++;
-	// 		}
-	// 	}
-	// 	count++;
-	// 	//////////////////////
-	// }
+	} while(*(in+(offset-1)));																		// -1 to account for offset++
 
 	return word_sizes;
 }
