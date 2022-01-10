@@ -1,3 +1,3 @@
 
-char** strdstr(char *in, char delimiter, unsigned char mode);
+char** strdstr(char *in, char delimiter);
 // void remove_newline(char *in);

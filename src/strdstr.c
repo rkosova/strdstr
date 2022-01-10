@@ -2,50 +2,42 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/**
- * To add:
- * 	Trailing space remover while still allowing for whitespace to be used as delimiter 
- **/
-
 
 int count_delim(char *in, char delimiter); 													   		// count number of delimiters in data
 int* get_word_size(char *in, int delimiter_count, char delimiter);     								// biggest distance between delimiters
 void remove_newline(char *in);																        // remove trailing '\n'
 
-char** strdstr(char *in, char delimiter, unsigned char mode)
+char** strdstr(char *in, char delimiter)
 {
 
-	if(mode) {																				        // memory mode
-		remove_newline(in); 
-		int delimiter_count = count_delim(in, delimiter);
-		int *word_sizes = get_word_size(in, delimiter_count, ',');
+	remove_newline(in); 
+	int delimiter_count = count_delim(in, delimiter);
+	int *word_sizes = get_word_size(in, delimiter_count, ',');
 
-		int prev_word_end = 0, _c=0;
-		char **words = malloc(sizeof(char*) * (delimiter_count+1));
+	int prev_word_end = 0, _c=0;
+	char **words = malloc(sizeof(char*) * (delimiter_count+1));
 
 
-		for(int w=0; w<delimiter_count+1; w++) {
-			char *temp = malloc(sizeof(char) * (word_sizes[w]+1));
-			_c = 0;
-			for(int c=prev_word_end; c<=(prev_word_end+word_sizes[w]); c++) {
-				if (c<(prev_word_end+word_sizes[w])) {
-					*(temp + (c-prev_word_end)) = *(in+c);
-					_c = c-prev_word_end;
-				} else if (c==(prev_word_end+word_sizes[w])) {
-					*(temp + (c-prev_word_end)) = '\0';
-					_c = c-prev_word_end;
-				}
+	for(int w=0; w<delimiter_count+1; w++) {
+		char *temp = malloc(sizeof(char) * (word_sizes[w]+1));
+		_c = 0;
+		for(int c=prev_word_end; c<=(prev_word_end+word_sizes[w]); c++) {
+			if (c<(prev_word_end+word_sizes[w])) {
+				*(temp + (c-prev_word_end)) = *(in+c);
+				_c = c-prev_word_end;
+			} else if (c==(prev_word_end+word_sizes[w])) {
+				*(temp + (c-prev_word_end)) = '\0';
+				_c = c-prev_word_end;
 			}
+		}
 
-			prev_word_end = prev_word_end + _c + 1; 												// +1 to account for ','
-			*(words+w) = temp;
-		}															   
+		prev_word_end = prev_word_end + _c + 1; 													// +1 to account for ','
+		*(words+w) = temp;
+	}															   
 
-		free(word_sizes);
-		return words;				
-	}
-
-	return NULL;
+	free(word_sizes);
+	return words;				
+	
 }
 
 int count_delim(char *in, char delimiter)
