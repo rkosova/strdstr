@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 
-int count_delim(char *in, char delimiter); 													   		// count number of delimiters in data
 int* get_word_size(char *in, int delimiter_count, char delimiter);     								// biggest distance between delimiters
 void remove_newline(char *in);																        // remove trailing '\n'
 

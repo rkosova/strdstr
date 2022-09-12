@@ -4,4 +4,4 @@
 char** strdstr(char *in, char delimiter);
 int count_delim(char *in, char delimiter);
 
-#endif //STRDSTR_H
+#endif // STRDSTR_H
